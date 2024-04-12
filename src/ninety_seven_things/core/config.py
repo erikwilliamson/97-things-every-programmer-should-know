@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     DATA_DIR: str
 
     # Data Source
-    SOURCE_DATA_DIR: str
+    SOURCE_REPO_URL: AnyHttpUrl
 
     # Alerting
     ALERT_EMAIL_RECIPIENT: EmailStr

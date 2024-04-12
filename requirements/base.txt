@@ -4,3 +4,11 @@ python-dotenv
 uvicorn[standard]
 pydantic-settings
 fastui
+redis
+fastapi-users[beanie,redis]
+bcrypt==4.0.1
+passlib[bcrypt]
+sendgrid
+phonenumbers
+gitpython
+jinja2

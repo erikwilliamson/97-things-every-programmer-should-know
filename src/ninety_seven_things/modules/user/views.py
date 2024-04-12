@@ -28,19 +28,6 @@ logger = logging.getLogger(settings.LOG_NAME)
 
 
 @router.get(
-    path="/user/{user_id}/impersonate",
-    status_code=status.HTTP_200_OK,
-    dependencies=[Depends(allow_impersonate_user)],
-    summary="Impersonates a User",
-)
-async def impersonate(user: user_dependencies.UserIDDependency) -> user_schemas.ImpersonationResponse:
-    strategy = auth_backend.get_strategy()
-    token = await strategy.write_token(user)
-
-    return user_schemas.ImpersonationResponse(access_token=token, token_type="bearer", impersonator=user.id)
-
-
-@router.get(
     path="/user/me/roles",
     status_code=status.HTTP_200_OK,
     summary="Retrieves the Current User's Roles",

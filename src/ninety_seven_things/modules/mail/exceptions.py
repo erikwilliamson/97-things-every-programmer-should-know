@@ -2,9 +2,10 @@
 from dataclasses import dataclass
 
 # Application-Local Imports
-from wj.lib.exceptions import APIException, MessageExceptionMixin
+from ninety_seven_things.lib.exceptions import NinetySevenThingsException, MessageExceptionMixin
 
 
 @dataclass
-class MailException(APIException, MessageExceptionMixin):
+class MailException(NinetySevenThingsException, MessageExceptionMixin):
     pass
+

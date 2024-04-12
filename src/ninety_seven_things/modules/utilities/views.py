@@ -10,26 +10,10 @@ from fastapi.exceptions import HTTPException
 
 # Application-Local Imports
 from ninety_seven_things.core.config import settings
-from ninety_seven_things.modules.booking import exceptions as booking_exceptions
-from ninety_seven_things.modules.booking import flows as booking_flows
-from ninety_seven_things.modules.booking import models as booking_models
-from ninety_seven_things.modules.booking import service as booking_service
-from ninety_seven_things.modules.business_hours.standard import schemas as standard_business_hours_schemas
-from ninety_seven_things.modules.business_hours.standard import service as standard_business_hours_flows
-from ninety_seven_things.modules.collective import models as collective_models
-from ninety_seven_things.modules.collective import schemas as collective_schemas
-from ninety_seven_things.modules.collective import service as collective_service
-from ninety_seven_things.modules.company import exceptions as company_exceptions
-from ninety_seven_things.modules.company import models as company_models
-from ninety_seven_things.modules.company import schemas as company_schemas
-from ninety_seven_things.modules.company import service as company_service
-from ninety_seven_things.modules.location import exceptions as location_exceptions
-from ninety_seven_things.modules.location import models as location_models
-from ninety_seven_things.modules.location import schemas as location_schemas
-from ninety_seven_things.modules.location import service as location_service
-from ninety_seven_things.modules.room import models as room_models
-from ninety_seven_things.modules.room import schemas as room_schemas
-from ninety_seven_things.modules.room import service as room_service
+from ninety_seven_things.modules.author import schemas as author_schemas
+from ninety_seven_things.modules.author import service as author_service
+from ninety_seven_things.modules.article import schemas as article_schemas
+from ninety_seven_things.modules.article import service as article_service
 from ninety_seven_things.modules.user import dependencies as user_dependencies
 from ninety_seven_things.modules.user import exceptions as user_exceptions
 from ninety_seven_things.modules.user import models as user_models
@@ -39,9 +23,25 @@ from ninety_seven_things.modules.user import service as user_service
 # Local Folder Imports
 from .role import allow_reseed_db, allow_wipe_db
 from .schemas import LoadedDataReport
+from .service import clear_db, load_seed_data, insert_erik
 
 router = APIRouter()
 logger = logging.getLogger(settings.LOG_NAME)
+
+
+@router.post(
+    path="/erik",
+    status_code=status.HTTP_201_CREATED,
+    summary="Creates Erik",
+    responses={
+        status.HTTP_201_CREATED: {
+            "content": {"application/json": {"schema": {"title": "Fooooo"}}},
+        }
+    },
+)
+async def erik() -> Response:
+    await insert_erik()
+    return Response(status_code=status.HTTP_201_CREATED)
 
 
 @router.post(
@@ -76,12 +76,9 @@ async def load_seed_data(
     except FileNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"File not found: {seed_data}") from exc
 
-    created_users = []  # non-collective users
-    created_collectives = []
-    created_members = []
-    created_companies = []
-    created_locations = []
-    created_rooms = []
+    created_users = []
+    created_authors = []
+    created_articles = []
 
     if "users" in seed_data:
         for user in seed_data["users"]:

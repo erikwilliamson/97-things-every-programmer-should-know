@@ -6,21 +6,19 @@ from typing import Dict
 
 # 3rd-Party Imports
 import sendgrid
-from beanie import PydanticObjectId
 from jinja2 import Environment, PackageLoader, Template, select_autoescape
 from pydantic.networks import EmailStr
 from python_http_client.exceptions import ForbiddenError
 from sendgrid.helpers.mail import Mail
 
 # Application-Local Imports
-from wj.core.config import settings
-from wj.modules.address import schemas as address_schemas
-from wj.modules.mail import schemas as mail_schemas
+from ninety_seven_things.core.config import settings
+from ninety_seven_things.modules.mail import schemas as mail_schemas
 
 # Local Folder Imports
 from .exceptions import MailException
 
-jinja_env = Environment(loader=PackageLoader("wj"), autoescape=select_autoescape())
+jinja_env = Environment(loader=PackageLoader("ninety_seven_things"), autoescape=select_autoescape())
 
 logger = logging.getLogger(settings.LOG_NAME)
 
@@ -71,51 +69,6 @@ def send_mail(
     finally:
         if attachment:
             delete_attachment(path=attachment.source_file_name)
-
-
-def send_booking_reminder_mail(
-    mail_to: EmailStr | str,
-    given_name: str,
-    family_name: str | None,
-    booking_start: str,
-    booking_end: str,
-    booking_id: PydanticObjectId,
-    location: address_schemas.Address,
-    attachment_path: pathlib.Path,
-) -> None:
-    subject_template = jinja_env.from_string(f"{settings.ENTITY_NAME} - Booking Reminder")
-    body_template = jinja_env.get_template("booking_reminder.html")
-
-    with open(attachment_path, "rb") as f:
-        attachment_contents = f.read()
-        f.close()
-
-    attachment = mail_schemas.AttachmentCreate(
-        raw_contents=attachment_contents,
-        file_type="text/calendar",
-        source_file_name=attachment_path,
-        destination_file_name=f"{location}_booking.ics",
-        content_id="Example Content ID",
-    )
-
-    send_mail(
-        mail_to=mail_to,
-        subject_template=subject_template,
-        body_template=body_template,
-        attachment=attachment,
-        environment={
-            "project_name": settings.ENTITY_NAME,
-            "email": mail_to,
-            "given_name": given_name,
-            "family_name": family_name,
-            "booking_start": booking_start,
-            "booking_end": booking_end,
-            "booking_id": booking_id,
-            "location": location,
-        },
-    )
-
-    # delete_attachment(attachment_path=attachment_path)
 
 
 def send_internal_server_mail(mail_to: EmailStr | str, body: Dict) -> None:

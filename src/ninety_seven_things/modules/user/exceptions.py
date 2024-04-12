@@ -2,16 +2,16 @@
 from dataclasses import dataclass
 
 # Application-Local Imports
-from wj.lib.exceptions import APIException, KeysExceptionMixin, MessageExceptionMixin
+from ninety_seven_things.lib.exceptions import NinetySevenThingsException, MessageExceptionMixin
 
 
 @dataclass
-class UserException(APIException):
+class UserException(NinetySevenThingsException):
     pass
 
 
 @dataclass
-class UserDoesNotExistException(UserException, KeysExceptionMixin):
+class UserDoesNotExistException(UserException):
     pass
 
 

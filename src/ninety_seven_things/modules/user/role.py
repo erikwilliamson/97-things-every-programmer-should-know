@@ -1,6 +1,6 @@
 # Application-Local Imports
-from wj.lib import enums
-from wj.lib.role import RoleChecker
+from ninety_seven_things.lib import enums
+from ninety_seven_things.lib.role import RoleChecker
 
 allow_create_user = RoleChecker(allowed_roles=[enums.Role.APPLICATION_ADMINISTRATOR])
 allow_create_anonymous_user = RoleChecker(allowed_roles=[enums.Role.ANY])

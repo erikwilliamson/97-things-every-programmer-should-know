@@ -17,7 +17,6 @@ from ninety_seven_things.lib.exceptions import AuthenticationException, DoesNotE
 from ninety_seven_things.lib.helpers import get_base_url
 from ninety_seven_things.lib.passwords import verify_password
 from ninety_seven_things.modules.mail import service as mail_flows
-from ninety_seven_things.modules.stripe.modules.customer import interface as stripe_customer_interface
 from ninety_seven_things.modules.user import models as user_models
 from ninety_seven_things.modules.user import service as user_service
 
@@ -38,13 +37,6 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[user_models.User, PydanticObj
 
     async def on_after_register(self, user: user_models.User, request: Optional[Request] = None) -> None:
         logger.info(f"User {user.id} has registered.")
-
-        logger.info(f"Creating stripe account for user {user.id}")
-        customer = await stripe_customer_interface.create_customer(user=user)
-
-        user.stripe_customer_id = customer.id
-        logger.info(f"Stripe account ID for user {user.id} is {user.stripe_customer_id}")
-        await user.save()
 
         confirmation_link = f"{get_base_url()}/user/{user.id}/confirmation"
 

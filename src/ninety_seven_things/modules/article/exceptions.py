@@ -1,8 +1,8 @@
 # Application-Local Imports
-from ninety_seven_things.lib.exceptions import MessageException
+from ninety_seven_things.lib.exceptions import NinetySevenThingsException
 
 
-class ArticleException(MessageException):
+class ArticleException(NinetySevenThingsException):
     pass
 
 

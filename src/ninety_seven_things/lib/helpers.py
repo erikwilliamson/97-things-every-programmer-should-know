@@ -1,7 +1,6 @@
 # Standard Library Imports
 import logging
-import random
-from datetime import date, time, timedelta
+from datetime import datetime, UTC
 
 # 3rd-Party Imports
 from beanie import PydanticObjectId
@@ -37,3 +36,8 @@ def simplify_operation_ids(app: FastAPI) -> None:
     for route in app.routes:
         if isinstance(route, APIRoute):
             route.operation_id = route.name
+
+
+def utcnow() -> datetime:
+    # this will allow us to use this as a Pydantic default_factory
+    return datetime.now(UTC)

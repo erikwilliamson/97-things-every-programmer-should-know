@@ -1,6 +1,6 @@
 # Standard Library Imports
 import logging
-from typing import List, Optional
+from typing import List, Optional, Type
 
 # 3rd-Party Imports
 from beanie import PydanticObjectId
@@ -9,23 +9,17 @@ from icecream import ic
 from pydantic import EmailStr
 
 # Application-Local Imports
-from wj.core.config import settings
-from wj.lib import exceptions, passwords
-from wj.modules.booking import service as booking_service
-from wj.modules.collective import service as collective_service
-from wj.modules.company import service as company_service
-from wj.modules.location import service as location_service
-from wj.modules.stripe.modules.customer import interface as stripe_customer_interface
+from ninety_seven_things.core.config import settings
+from ninety_seven_things.lib import exceptions, passwords
 
 # Local Folder Imports
 from .exceptions import UserDoesNotExistException, UserExistsException
 from .models import User
-from .schemas import UserCreate, UserRoles
+from .schemas import UserCreate
 
 logger = logging.getLogger(settings.LOG_NAME)
 
-
-async def create_user(user_in: UserCreate):
+async def create_user(user_in: UserCreate) -> User:
     try:
         await get_one_by_email(email=user_in.email)
     except UserDoesNotExistException:
@@ -41,66 +35,10 @@ async def create_user(user_in: UserCreate):
 
     # now create the proper user object
     created_user = User(**temp_user)
-    await created_user.save()
-
-    logger.info(f"Creating stripe account for user {created_user.id}")
-    customer = await stripe_customer_interface.create_customer(user=created_user)
-    created_user.stripe_customer_id = customer.id
-    logger.info(f"Stripe account ID for user {created_user.id} is {created_user.stripe_customer_id}")
 
     await created_user.save()
 
-    # logger.info(f"Getting address co-ordinates for user {created_user.id}")
-    #
-    # geocoder = GoogleV3(api_key=settings.GOOGLE_MAPS_API_KEY)
-
-    # try:
-    #     created_user.address.coordinates = address_service.get_coordinates(
-    #         query_term=created_user.address.geo_query_term, geocoder=geocoder
-    #     )
-    # except address_exceptions.GeocoderUnavailableException:
-    #     message = f"Unable to get coordinates for user {created_user.given_name} {created_user.family_name}"
-    #     logger.error(message)
-
-    # try:
-    #     timezone = address_service.get_timezone(
-    #         point=Point(
-    #             latitude=created_user.address.coordinates.latitude,
-    #             longitude=created_user.address.coordinates.longitude
-    #         ),
-    #         geocoder=geocoder,
-    #     )
-    # except address_exceptions.GeocoderUnavailableException:
-    #     message = f"Unable to get TZ for user ({created_user.id})"
-    #     logger.error(message)
-    # else:
-    #     created_user.address.timezone = timezone.pytz_timezone.zone
-    #
-    # await created_user.save()
-    #
     return created_user
-
-
-async def get_roles(user_id: PydanticObjectId) -> UserRoles:
-    user = await get_one_by_id(user_id=user_id)
-
-    roles = {
-        "user_id": user_id,
-        "anonymous_user": user.is_anonymous,
-        "application_administrator": user.is_superuser,
-        "company_administrator": [
-            company.id for company in await company_service.get_by_administrator_id(user_id=user_id)
-        ],
-        "location_administrator": [location.id for location in await location_service.get_by_administrator(user=user)],
-        "collective_member": [
-            collective.id for collective in await collective_service.get_by_member_id(user_id=user_id)
-        ],
-        "bookings": [
-            booking.id for booking in await booking_service.get_many_by_booked_for(user_id=user_id, fetch_links=False)
-        ],
-    }
-    return UserRoles(**roles)
-
 
 async def get_many(fetch_links: bool = False, skip: int = 0, limit: int = 100) -> List[User]:
     """ "
@@ -116,7 +54,7 @@ async def get_one_by_id(user_id: PydanticObjectId, fetch_links: bool = False) ->
     user = await User.find_one(User.id == user_id, fetch_links=fetch_links)
 
     if user is None:
-        raise UserDoesNotExistException(keys=[str(user_id)])
+        raise UserDoesNotExistException
 
     return user
 
@@ -125,7 +63,7 @@ async def get_one_by_email(email: EmailStr | str) -> User:
     target_user = await User.find_one(User.email == email)
 
     if target_user is None:
-        raise UserDoesNotExistException(keys=[str(email)])
+        raise UserDoesNotExistException
 
     return target_user
 
@@ -136,7 +74,7 @@ async def get_many_by_email(email_addresses: List[EmailStr]) -> List[User]:
     missing = set(email_addresses).difference({u.email for u in result})
 
     if len(result) != len(email_addresses):
-        raise UserDoesNotExistException(keys=list(missing))
+        raise UserDoesNotExistException
 
     return result
 

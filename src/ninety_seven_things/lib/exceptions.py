@@ -13,11 +13,34 @@ class NinetySevenThingsException(Exception):
     """
 
 @dataclass
-class MessageException:
+class MessageExceptionMixin:
     message: str
 
 
+@dataclass
 class ConfigurationException(NinetySevenThingsException):
     """
     Configuration Error
+    """
+
+
+@dataclass
+class AuthenticationException(NinetySevenThingsException):
+    pass
+
+
+@dataclass
+class AuthorisationException(NinetySevenThingsException):
+    pass
+
+
+@dataclass
+class SearchException(NinetySevenThingsException, MessageExceptionMixin):
+    pass
+
+
+@dataclass
+class DoesNotExistException(NinetySevenThingsException, MessageExceptionMixin):
+    """
+    The object / Document being searched for does not exist.
     """
