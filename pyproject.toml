@@ -1,0 +1,83 @@
+[project]
+name = "wj"
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {attr = "ninety_seven_things.__version__"}
+
+[tool.ruff]
+line-length = 120
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = [
+    "tests"
+]
+markers = ["wip"]
+asyncio_mode = "auto"
+
+[tool.mypy]
+plugins = ["pydantic.mypy", "sqlmypy"]
+ignore_missing_imports = true
+disallow_untyped_defs = true
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+line_length = 120
+import_heading_stdlib = "Standard Library Imports"
+import_heading_thirdparty = "3rd-Party Imports"
+import_heading_firstparty = "Application-Local Imports"
+import_heading_future = "Future Imports"
+import_heading_localfolder = "Local Folder Imports"
+
+[tool.pyright]
+include = ["src"]
+
+[tool.black]
+line-length = 120
+
+[project.urls]
+homepage = "https://techsanity-ca.atlassian.net/wiki/spaces/WJ/overview?homepageId=17858768"
+repository = "https://github.com/erik-at-techsanity/wj-api"
+
+[tool.pylint.MASTER]
+load-plugins = "pylint_pydantic"
+
+[tool.pylint."messages control"]
+disable = [
+    "invalid-name",
+    "fixme",
+    "use-dict-literal",
+    "duplicate-code",
+    "logging-fstring-interpolation",
+    "raw-checker-failed",
+    "bad-inline-option",
+    "locally-disabled",
+    "file-ignored",
+    "suppressed-message",
+    "useless-suppression",
+    "deprecated-pragma",
+    "use-symbolic-message-instead",
+    "missing-module-docstring",
+    "missing-function-docstring",
+    "missing-class-docstring",
+    "too-few-public-methods",
+    "too-many-ancestors"
+]
+extension-pkg-whitelist = "pydantic"
+overgeneral-exceptions = [
+    "builtins.BaseException",
+    "builtins.Exception"
+]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.vulture]
+min_confidence = 80
+
+[tool.coverage.report]
+sort = "Cover"
+skip_covered = true

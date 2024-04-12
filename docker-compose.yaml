@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: api
+    command: uvicorn ninety_seven_things.main:app --reload --reload-dir src --use-colors --host 0.0.0.0 --port ${API_PORT}
+    env_file:
+      - .env
+    expose:
+      - ${API_PORT}
+    depends_on:
+      - mongo
+    links:
+      - mongo
+    volumes:
+      - ./:/app
+      - ./tests:/tests
+    ports:
+      - "${API_PORT}:${API_PORT}"
+
+#  coverage:
+#    build: .
+#    container_name: coverage
+#    command: /usr/local/bin/python3.11 -m http.server ${COVERAGE_SERVER_PORT} --directory /coverage
+#    expose:
+#      - ${COVERAGE_SERVER_PORT}
+#    volumes:
+#      - ./doc/coverage:/coverage
+#    ports:
+#      - "${COVERAGE_SERVER_PORT}:${COVERAGE_SERVER_PORT}"
+
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    expose:
+      - 6379
+    ports:
+      - "6379:6379"
+
+  mongo:
+    container_name: mongo
+    image: mongo:4.4.18
+    env_file:
+      - .env
+    ports:
+      - "27017:27017"
+    expose:
+      - 27017
+    command:
+      - '--logpath'
+      - '/var/log/mongodb/mongod.log'

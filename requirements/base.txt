@@ -1,0 +1,6 @@
+beanie
+fastapi
+python-dotenv
+uvicorn[standard]
+pydantic-settings
+fastui

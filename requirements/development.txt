@@ -1,0 +1,19 @@
+-r base.txt
+mypy
+black
+isort
+flake8
+pytest
+pytest-cov
+pytest-asyncio
+vulture
+pylint
+pylint-pydantic
+async_asgi_testclient
+pytest-mock
+pyright
+ruff
+asgi_lifespan
+httpx
+icecream
+bpython
