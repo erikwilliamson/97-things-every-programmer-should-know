@@ -20,6 +20,7 @@ from ninety_seven_things.ui.admin.article import router as article_admin_ui_rout
 from ninety_seven_things.ui.admin.author import router as author_admin_ui_router
 from ninety_seven_things.ui.admin.main import router as main_admin_ui_router
 from ninety_seven_things.ui.reader.main import router as main_reader_ui_router
+from ninety_seven_things.ui.index import router as index_ui_router
 
 logger = logging.getLogger(settings.LOG_NAME)
 logger.info("Loading routers")
@@ -30,6 +31,7 @@ app.include_router(author_admin_ui_router, prefix="/ui/admin", include_in_schema
 app.include_router(main_admin_ui_router, prefix="/ui/admin", include_in_schema=False)
 
 app.include_router(main_reader_ui_router, prefix="/ui/reader", include_in_schema=False)
+app.include_router(index_ui_router, prefix="/ui", include_in_schema=False)
 
 # API Routers
 app.include_router(utilities_router, tags=["Utilities"], prefix="/api/v1")
@@ -91,6 +93,7 @@ async def reader_html_landing() -> HTMLResponse:
     """Simple HTML page which serves the React app, comes last as it matches all paths."""
     return HTMLResponse(prebuilt_html(title="97 Things Reader", api_root_url="/ui"))
 
-
-routes = [{"path": route.path, "name": route.name} for route in app.routes]
-ic(routes)
+@app.get("/{path:path}")
+async def index_html_landing() -> HTMLResponse:
+    """Simple HTML page which serves the React app, comes last as it matches all paths."""
+    return HTMLResponse(prebuilt_html(title="97 Things", api_root_url="/ui"))
