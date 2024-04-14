@@ -1,15 +1,19 @@
+# Future Imports
 from __future__ import annotations as _annotations
+
+# 3rd-Party Imports
 import fastapi
 import fastui.forms
 import pydantic
 from fastapi import params as fastapi_params
-from icecream import ic
-
 from fastui import AnyComponent
 from fastui import components as c
 from fastui.events import GoToEvent
+from icecream import ic
 
+# Application-Local Imports
 from ninety_seven_things.core.config import settings
+
 
 #
 # https://github.com/pydantic/FastUI/issues/146
@@ -24,35 +28,29 @@ def patched_fastui_form(model: type[fastui.forms.FormModel]) -> fastapi_params.D
             except pydantic.ValidationError as e:
                 raise fastapi.HTTPException(
                     status_code=422,
-                    detail={
-                        'form': e.errors(
-                            include_input=False,
-                            include_url=False,
-                            include_context=False
-                        )
-                    },
+                    detail={"form": e.errors(include_input=False, include_url=False, include_context=False)},
                 )
 
     return fastapi.Depends(run_fastui_form)
 
 
-def application_page(*components: AnyComponent, title: str | None = None) -> list[AnyComponent]:
+def admin_page(*components: AnyComponent, title: str | None = None) -> list[AnyComponent]:
     return [
-        c.PageTitle(text=f'{settings.PROJECT_NAME} — {title}' if title else settings.PROJECT_NAME),
+        c.PageTitle(text=f"{settings.PROJECT_NAME} — {title}" if title else settings.PROJECT_NAME),
         c.Navbar(
             title=settings.PROJECT_NAME,
-            title_event=GoToEvent(url='/'),
+            title_event=GoToEvent(url="/"),
             start_links=[
                 c.Link(
-                    components=[c.Text(text='Articles')],
-                    on_click=GoToEvent(url='/article'),
-                    active='startswith:/article',
+                    components=[c.Text(text="Articles")],
+                    on_click=GoToEvent(url="/admin/article"),
+                    active="startswith:/admin/article",
                 ),
                 c.Link(
-                    components=[c.Text(text='Authors')],
-                    on_click=GoToEvent(url='/author'),
-                    active='startswith:/author',
-                )
+                    components=[c.Text(text="Authors")],
+                    on_click=GoToEvent(url="/admin/author"),
+                    active="startswith:/admin/author",
+                ),
             ],
         ),
         c.Page(
@@ -65,10 +63,11 @@ def application_page(*components: AnyComponent, title: str | None = None) -> lis
             extra_text=settings.PROJECT_NAME,
             links=[
                 c.Link(
-                    components=[c.Text(text='GitLab')], on_click=GoToEvent(url='https://gitlab.com/erik_at_ts/speaker-seeker')
+                    components=[c.Text(text="GitLab")],
+                    on_click=GoToEvent(url="https://gitlab.com/erik_at_ts/speaker-seeker"),
                 ),
-                c.Link(components=[c.Text(text='PyPI')], on_click=GoToEvent(url='https://pypi.org/project/fastui/')),
-                c.Link(components=[c.Text(text='NPM')], on_click=GoToEvent(url='https://www.npmjs.com/org/pydantic/')),
+                c.Link(components=[c.Text(text="PyPI")], on_click=GoToEvent(url="https://pypi.org/project/fastui/")),
+                c.Link(components=[c.Text(text="NPM")], on_click=GoToEvent(url="https://www.npmjs.com/org/pydantic/")),
             ],
         ),
     ]

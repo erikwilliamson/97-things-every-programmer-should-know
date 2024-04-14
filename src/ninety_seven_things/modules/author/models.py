@@ -8,7 +8,6 @@ from pydantic import computed_field
 # Application-Local Imports
 from ninety_seven_things.core.config import settings
 
-
 logger = logging.getLogger(settings.LOG_NAME)
 
 

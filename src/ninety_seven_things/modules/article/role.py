@@ -1,9 +1,6 @@
 # Application-Local Imports
 from ninety_seven_things.lib import enums, role
 
-# Local Folder Imports
-from .models import Article
-
 allow_create_article = role.RoleChecker(allowed_roles=[enums.Role.APPLICATION_ADMINISTRATOR])
 allow_list_article = role.RoleChecker(allowed_roles=[enums.Role.ANY])
 allow_view_article = role.RoleChecker(allowed_roles=[enums.Role.ANY])

@@ -12,6 +12,7 @@ class NinetySevenThingsException(Exception):
     Base exception class
     """
 
+
 @dataclass
 class MessageExceptionMixin:
     message: str

@@ -6,10 +6,10 @@ from ninety_seven_things.lib.exceptions import MessageExceptionMixin, NinetySeve
 
 
 @dataclass
-class AuthorException(NinetySevenThingsException, MessageExceptionMixin):
+class GitException(NinetySevenThingsException):
     pass
 
 
 @dataclass
-class AuthorDoesNotExistException(AuthorException):
+class CloneRepoException(GitException, MessageExceptionMixin):
     pass

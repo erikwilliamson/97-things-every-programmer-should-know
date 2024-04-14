@@ -14,20 +14,19 @@ from ninety_seven_things.modules.user import models as user_models
 # Local Folder Imports
 from .dependencies import ArticleDependency
 from .exceptions import ArticleException
-from .schemas import (
-    ArticleCreate, ArticleUpdate, FullArticleView
+from .role import (
+    allow_create_article,
+    allow_delete_all_article,
+    allow_delete_article,
+    allow_list_article,
+    allow_update_article,
 )
-from .service import (
-    create,
-    delete_all,
-    delete_one,
-    get_many,
-    update,
-)
-from .role import allow_update_article, allow_delete_article, allow_delete_all_article, allow_create_article, allow_list_article
+from .schemas import ArticleCreate, ArticleUpdate, FullArticleView
+from .service import create, delete_all, delete_one, get_all, update
 
 router = APIRouter()
 logger = logging.getLogger(settings.LOG_NAME)
+
 
 @router.post(
     path="/article",
@@ -59,7 +58,7 @@ async def read_all_articles(
     limit: int = 100,
 ) -> List[FullArticleView]:
     try:
-        articles = await get_many(fetch_links=True, skip=skip, limit=limit)
+        articles = await get_all(fetch_links=True, skip=skip, limit=limit)
     except ValidationError as exc:
         raise exceptions.DataIntegrityException(source_exception=exc) from exc
 

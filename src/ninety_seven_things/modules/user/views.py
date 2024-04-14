@@ -11,17 +11,17 @@ from pydantic import EmailStr
 from starlette import status
 
 # Application-Local Imports
-from wj.core.config import settings
-from wj.lib.exceptions import DoesNotExistException
-from wj.lib.security import auth_backend
-from wj.modules.user import dependencies as user_dependencies
-from wj.modules.user import schemas as user_schemas
-from wj.modules.user import service as user_service
+from ninety_seven_things.core.config import settings
+from ninety_seven_things.lib.exceptions import DoesNotExistException
+from ninety_seven_things.lib.security import auth_backend
+from ninety_seven_things.modules.user import dependencies as user_dependencies
+from ninety_seven_things.modules.user import schemas as user_schemas
+from ninety_seven_things.modules.user import service as user_service
 
 # Local Folder Imports
 from .exceptions import UserExistsException
-from .role import allow_create_anonymous_user, allow_impersonate_user, allow_list_user, allow_view_user
-from .service import create_user, find_user, get_many, get_many_by_email
+from .role import allow_create_anonymous_user, allow_list_user, allow_view_user
+from .service import create_user, get_many
 
 router = APIRouter()
 logger = logging.getLogger(settings.LOG_NAME)
@@ -117,61 +117,3 @@ async def find_many(email_addresses: list[EmailStr] | None = Query(default=None)
 )
 async def read_all_users(skip: int = 0, limit: int = 100) -> List[user_schemas.UserView]:
     return [user_schemas.UserView(**user.model_dump()) for user in await get_many(skip=skip, limit=limit)]
-
-
-@router.post(
-    path="/user",
-    status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(allow_create_anonymous_user)],
-    summary="Create an Anonymous User",
-)
-async def create_anonymous_user(
-    user_in: user_schemas.AnonymousUserCreate,
-) -> user_schemas.UserView:
-    logger.info(f"Creating user: {user_in.email} initiated by {user_in.email}")
-
-    user_details = user_in.model_dump()
-
-    user_details["is_anonymous"] = True
-    user_details["password"] = str(uuid.uuid4())
-    user_details["is_active"] = False
-    user_details["is_superuser"] = False
-    user_details["is_verified"] = False
-
-    try:
-        created_user = await create_user(user_schemas.UserCreate(**user_details))
-    except UserExistsException as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=exc.message) from exc
-
-    logger.info(f"User {user_in.email} created with ID {created_user.id}")
-
-    user_view = created_user.model_dump()
-    user_view["registered_account"] = None
-
-    return user_schemas.UserView(**user_view)
-
-
-@router.post(
-    path="/user/associate",
-    status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(allow_create_anonymous_user)],
-    summary="Associates an anonymous user account with a registered account",
-)
-async def associate_anonymous_account_with_registered_account(
-    anonymous_user_id: PydanticObjectId,
-    registered_user_id: PydanticObjectId,
-) -> user_schemas.UserView:
-    anonymous_user = await user_service.get_one_by_id(user_id=anonymous_user_id)
-    registered_user = await user_service.get_one_by_id(user_id=registered_user_id)
-    ic(anonymous_user, registered_user)
-
-    anonymous_user.registered_account = registered_user
-    await anonymous_user.save()
-
-    ic(registered_user.model_dump())
-    registered_user_data = registered_user.model_dump()
-    registered_user_data["unregistered_accounts"] = [
-        unregistered_account.model_dump() for unregistered_account in registered_user.unregistered_accounts
-    ]
-    # return user_schemas.UserView(**registered_user.model_dump())
-    return user_schemas.UserView(**registered_user_data)

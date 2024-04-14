@@ -4,6 +4,7 @@ from typing import Optional
 
 # 3rd-Party Imports
 from beanie import PydanticObjectId
+from pydantic import BaseModel
 
 # Application-Local Imports
 from ninety_seven_things.core.config import settings
@@ -15,17 +16,26 @@ logger = logging.getLogger(settings.LOG_NAME)
 class FullArticleView(schemas.Entity):
     id: PydanticObjectId
     title: str
-    content: str
+    index: int
+    contents: str
     language: str
 
 
 class AbridgedArticleView(schemas.Entity):
     id: PydanticObjectId
     title: str
+    index: int
+
+
+class AbridgedArticleProjection(BaseModel):
+    _id: PydanticObjectId
+    title: str
+    index: int
 
 
 class ArticleCreate(schemas.Entity):
     title: str
+    index: int
     contents: str
     language: str
 

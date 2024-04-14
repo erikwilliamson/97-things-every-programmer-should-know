@@ -6,6 +6,7 @@ from typing import List
 # 3rd-Party Imports
 from fastapi import Depends, Request
 from fastapi.exceptions import HTTPException
+from icecream import ic
 
 # Application-Local Imports
 from ninety_seven_things.core.config import settings
@@ -31,15 +32,19 @@ class RoleChecker:
         user: user_models.User = Depends(current_active_user),
     ) -> None:
         if enums.Role.ANY in self.allowed_roles:
+            ic()
             logger.debug("allowing ANY role through")
             return
 
         if enums.Role.NONE in self.allowed_roles:
+            ic()
             logger.debug("disallowing NONE role through")
             raise HTTPException(status_code=403, detail="Operation not permitted")
 
         if enums.Role.APPLICATION_ADMINISTRATOR in self.allowed_roles:
+            ic()
             if user and user.is_superuser:
+                ic()
                 logger.debug("allowing superuser through")
                 return
 

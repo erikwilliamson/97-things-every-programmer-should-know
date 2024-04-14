@@ -1,6 +1,6 @@
 # Standard Library Imports
 import logging
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 # 3rd-Party Imports
 from beanie import PydanticObjectId

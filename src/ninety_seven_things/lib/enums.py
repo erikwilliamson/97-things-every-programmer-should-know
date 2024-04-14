@@ -6,6 +6,7 @@ class EntityType(StrEnum):
     ARTICLE = "article"
     AUTHOR = "author"
 
+
 class HealthCheckStatus(StrEnum):
     OK = "ok"
     NOT_OK = "not ok"

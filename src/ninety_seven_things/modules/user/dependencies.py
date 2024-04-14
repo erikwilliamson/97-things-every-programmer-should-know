@@ -9,12 +9,13 @@ from icecream import ic
 from pydantic import EmailStr
 
 # Application-Local Imports
-from ninety_seven_things.lib import security
+from ninety_seven_things.lib import enums, security
 from ninety_seven_things.lib.exceptions import DoesNotExistException
 
 # Local Folder Imports
 from .models import User
-from .service import get_one_by_email, get_one_by_id
+from .schemas import UserRoles
+from .service import get_one_by_email, get_one_by_id, get_roles
 
 
 async def valid_user_id(user_id: PydanticObjectId) -> User:
@@ -35,12 +36,10 @@ async def valid_user_email(user_email: EmailStr | str) -> User:
     return user
 
 
-async def user_roles(
-    current_user: User = Depends(security.current_active_user),
-) -> List[Role]:
+async def user_roles(current_user: User = Depends(security.current_active_user)) -> UserRoles:
     if current_user is None:
         ic("current_user is None")
-        return UserRoles()
+        return []
 
     roles = await get_roles(user_id=current_user.id)
     return roles
@@ -48,4 +47,4 @@ async def user_roles(
 
 UserIDDependency = Annotated[User, Depends(valid_user_id)]
 UserEmailDependency = Annotated[User, Depends(valid_user_email)]
-UserRoleDependency = Annotated[UserRoles, Depends(user_roles)]
+UserRoleDependency = Annotated[List[enums.Role], Depends(user_roles)]

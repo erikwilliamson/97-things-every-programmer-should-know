@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 
 # Application-Local Imports
-from ninety_seven_things.lib.exceptions import NinetySevenThingsException, MessageExceptionMixin
+from ninety_seven_things.lib.exceptions import MessageExceptionMixin, NinetySevenThingsException
 
 
 @dataclass

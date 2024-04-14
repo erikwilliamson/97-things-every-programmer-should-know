@@ -11,11 +11,20 @@ from ninety_seven_things.core.config import settings
 from ninety_seven_things.lib.exceptions import DoesNotExistException
 
 # Local Folder Imports
-from .exceptions import ArticleException, ArticleDoesNotExistException
+from .exceptions import ArticleDoesNotExistException, ArticleException, ArticleValidationException
 from .models import Article
-from .schemas import ArticleCreate, ArticleUpdate
+from .schemas import AbridgedArticleProjection, ArticleCreate, ArticleUpdate
 
 logger = logging.getLogger(settings.LOG_NAME)
+
+
+async def get_by_index_and_language(index: int, language: str) -> Article:
+    article = await Article.find_one(Article.index == index, Article.language == language)
+
+    if article is None:
+        raise DoesNotExistException(message=f"An article with index {index} and language {language} does not exist")
+
+    return article
 
 
 async def get_by_id(article_id: PydanticObjectId, fetch_links: bool = False) -> Article:
@@ -27,14 +36,34 @@ async def get_by_id(article_id: PydanticObjectId, fetch_links: bool = False) -> 
     return article
 
 
-async def get_many(fetch_links: bool = False, skip: int = 0, limit: int = 100) -> List[Article]:
+async def get_by_language(language: str) -> List[AbridgedArticleProjection]:
+    articles = (
+        await Article.find(Article.language == language)
+        .sort(+Article.index)
+        .project(AbridgedArticleProjection)
+        .to_list()
+    )
+
+    if articles is []:
+        raise DoesNotExistException(message=f"Unable to locate articles with language {language}")
+
+    return articles
+
+
+async def get_all(fetch_links: bool = False, skip: int = 0, limit: int = 100) -> List[Article]:
     """ "
     Retrieve many articles
     """
     try:
-        return await Article.find_all(fetch_links=fetch_links).sort(+Article.name).skip(skip).limit(limit).to_list()
+        return (
+            await Article.find_all(fetch_links=fetch_links)
+            .sort(+Article.index, +Article.language)
+            .skip(skip)
+            .limit(limit)
+            .to_list()
+        )
     except ValidationError as exc:
-        raise ArticleException(message=f"{str(exc)}") from exc
+        raise ArticleValidationException(message=f"{str(exc)}") from exc
 
 
 async def create(article_in: ArticleCreate) -> Article:
@@ -64,7 +93,6 @@ async def update(article: Article, updated_article_in: ArticleUpdate) -> Article
 
 
 async def delete_one(article: Article) -> None:
-
     await article.delete()
 
     return
